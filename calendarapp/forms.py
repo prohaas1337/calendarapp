@@ -1,14 +1,31 @@
 # forms.py
 from django import forms
-
-
-from django import forms
 from .models import Event
 
+
 class EventForm(forms.ModelForm):
+    WEEKDAYS = [
+        ('0', 'Hétfő'),
+        ('1', 'Kedd'),
+        ('2', 'Szerda'),
+        ('3', 'Csütörtök'),
+        ('4', 'Péntek'),
+        ('5', 'Szombat'),
+        ('6', 'Vasárnap'),
+    ]
+
+    REPEAT_CHOICES = [
+        ('1m', '1 hónap'),
+        ('3m', '3 hónap'),
+        ('6m', '6 hónap'),
+    ]
+
+    repeat_weekday = forms.ChoiceField(choices=WEEKDAYS, label='Melyik nap ismétlődjön?')
+    repeat_until = forms.ChoiceField(choices=REPEAT_CHOICES, required=False, label='Ismétlés időtartama')
+
     class Meta:
         model = Event
-        fields = ['title', 'description', 'start_time', 'end_time', 'max_capacity', 'cancel_limit_hours',
+        fields = ['title', 'description', 'start_time', 'end_time', 'repeat_weekday', 'repeat_until','max_capacity', 'cancel_limit_hours',
                   'signup_limit_hours']
         widgets = {
             'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),

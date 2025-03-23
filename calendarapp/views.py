@@ -1,21 +1,18 @@
 #views.py
 from django.utils.timezone import now
-from datetime import timedelta
 from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from .forms import EventForm
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from .models import Event, Attendance
 from django.http import JsonResponse
 from django.utils.dateparse import parse_datetime
 from django.contrib.auth.decorators import permission_required
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from .models import Event
 from .forms import EventForm
-from django.contrib.auth.decorators import permission_required
-from django.shortcuts import get_object_or_404
+from datetime import timedelta
 
 
 @login_required
@@ -171,11 +168,46 @@ def create_event(request):
     if request.method == 'POST':
         form = EventForm(request.POST)
         if form.is_valid():
-            form.save()
+            event = form.save(commit=False)
+            repeat_weekday = int(form.cleaned_data['repeat_weekday'])
+            repeat_until = form.cleaned_data['repeat_until']
+
+            # Kezdő dátum
+            start_datetime = form.cleaned_data['start_time']
+            end_datetime = form.cleaned_data['end_time']
+
+            # Meghatározzuk a vége dátumot
+            if repeat_until == '1m':
+                end_date_limit = start_datetime + timedelta(days=30)
+            elif repeat_until == '3m':
+                end_date_limit = start_datetime + timedelta(days=90)
+            elif repeat_until == '6m':
+                end_date_limit = start_datetime + timedelta(days=180)
+            else:
+                end_date_limit = start_datetime  # csak egy alkalom
+
+            # Először beállítjuk az első alkalmat ha a nap egyezik
+            current_date = start_datetime
+            while current_date <= end_date_limit:
+                if current_date.weekday() == repeat_weekday:
+                    Event.objects.create(
+                        title=event.title,
+                        description=event.description,
+                        start_time=current_date,
+                        end_time=current_date.replace(hour=end_datetime.hour, minute=end_datetime.minute),
+                        max_capacity=event.max_capacity,
+                        cancel_limit_hours=event.cancel_limit_hours,
+                        signup_limit_hours=event.signup_limit_hours
+                    )
+                current_date += timedelta(days=1)
+
             return redirect('calendarapp:calendar_view')
     else:
         form = EventForm()
-    return render(request, 'calendarapp/create_event.html', {'form': form})
+    return render(request, 'calendarapp/event_form.html', {'form': form})
+
+
+
 
 @login_required
 @permission_required('calendarapp.change_event', raise_exception=True)
