@@ -204,7 +204,7 @@ def create_event(request):
             return redirect('calendarapp:calendar_view')
     else:
         form = EventForm()
-    return render(request, 'calendarapp/event_form.html', {'form': form})
+    return render(request, 'calendarapp/create_event.html', {'form': form})
 
 
 
