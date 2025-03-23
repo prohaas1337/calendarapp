@@ -1,0 +1,7 @@
+<h2>Biztosan törlöd ezt az órát?</h2>
+<p>{{ event.title }} - {{ event.start_time }}</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Törlés</button>
+  <a href="{% url 'calendarapp:calendar' %}">Mégse</a>
+</form>

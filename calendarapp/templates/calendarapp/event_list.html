@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Órák Listája</title>
+</head>
+<body>
+    <h1>Órák Listája</h1>
+    <ul>
+        {% for event in events %}
+            <li>{{ event.title }} ({{ event.start_time }} - {{ event.end_time }})</li>
+        {% empty %}
+            <li>Nincsenek események.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'create_event' %}">Új Óra Létrehozása</a>
+</body>
+</html>
