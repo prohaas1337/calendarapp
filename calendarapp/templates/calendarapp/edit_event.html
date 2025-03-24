@@ -35,12 +35,23 @@
             </button>
           </div>
           <div class="modal-body">
-            <p>Válassz egy lehetőséget:</p>
+            <p>Ez az esemény {{ event.start_time }} kezdődik. Biztosan törölni akarod?</p>
+            <p>Ez a következő jövőbeli eseményeket érintheti:</p>
+            <ul>
+              {% for future_event in future_events %}
+                <li>{{ future_event.start_time }}</li>
+              {% empty %}
+                <li>Nincsenek jövőbeli események.</li>
+              {% endfor %}
+            </ul>
+
             <form method="post" action="{% url 'calendarapp:delete_event' event.id %}" id="deleteEventForm">
               {% csrf_token %}
-              <button type="submit" class="btn btn-danger">Opció 1: Törlés</button>
+              <button type="submit" class="btn btn-danger" name="delete_single">Csak ezt az eseményt törlöm</button>
+              <button type="submit" class="btn btn-warning" name="delete_all">Az összes jövőbeli eseményt törlöm</button>
             </form>
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Opció 2: Mégsem</button>
+
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Mégsem</button>
           </div>
         </div>
       </div>
