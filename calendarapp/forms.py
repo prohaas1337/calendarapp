@@ -15,6 +15,7 @@ class EventForm(forms.ModelForm):
     ]
 
     REPEAT_CHOICES = [
+        ('0', 'ne ismétlődjön'),
         ('1m', '1 hónap'),
         ('3m', '3 hónap'),
         ('6m', '6 hónap'),

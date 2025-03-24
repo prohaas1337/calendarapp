@@ -5,6 +5,9 @@
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Mentés</button>
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Biztosan törölni akarod ezt az eseményt?');">
+    Esemény törlése
+    </button>
   </form>
   <a href="{% url 'calendarapp:calendar_view' %}">Vissza a naptárhoz</a>
 {% endblock %}
