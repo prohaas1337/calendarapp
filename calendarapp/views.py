@@ -152,7 +152,7 @@ def unsubscribe_event(request):
         return JsonResponse({'status': 'error', 'message': 'Nem található a jelentkezés erre az eseményre.'}, status=404)
 
 
-
+from django.http import HttpResponseForbidden
 @login_required
 @permission_required('calendarapp.delete_event', raise_exception=True)
 def delete_event(request, event_id):
@@ -160,7 +160,8 @@ def delete_event(request, event_id):
     if request.method == 'POST':
         event.delete()
         return redirect('calendarapp:calendar_view')
-    return render(request, 'calendarapp/delete_event_confirm.html', {'event': event})
+    return HttpResponseForbidden()  # Vagy valami más, ha nem akarod, hogy az URL elérhető legyen GET kérésre
+
 
 @login_required
 @permission_required('calendarapp.add_event', raise_exception=True)
