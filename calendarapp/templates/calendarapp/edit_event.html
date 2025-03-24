@@ -1,19 +1,57 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Óra szerkesztése</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
 
-{% block content %}
-  <h2>Óra szerkesztése: {{ event.title }}</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Mentés</button>
-  </form>
+  <div class="container mt-5">
+    <h2>Óra szerkesztése: {{ event.title }}</h2>
 
-    <!-- Törlés gomb formba csomagolva -->
-  <form method="post" action="{% url 'calendarapp:delete_event' event.id %}" id="deleteEventForm">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-danger" onclick="return confirm('Biztosan törölni akarod ezt az eseményt?');">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Mentés</button>
+    </form>
+
+    <!-- Törlés gomb -->
+    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
       Esemény törlése
     </button>
-  </form>
 
-  <a href="{% url 'calendarapp:calendar_view' %}">Vissza a naptárhoz</a>
-{% endblock %}
+    <!-- Modális ablak a törléshez -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteModalLabel">Biztosan törölni akarod az eseményt?</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Válassz egy lehetőséget:</p>
+            <form method="post" action="{% url 'calendarapp:delete_event' event.id %}" id="deleteEventForm">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger">Opció 1: Törlés</button>
+            </form>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Opció 2: Mégsem</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a href="{% url 'calendarapp:calendar_view' %}" class="btn btn-link">Vissza a naptárhoz</a>
+  </div>
+
+  <!-- Bootstrap és jQuery szükséges a modális működéséhez -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
