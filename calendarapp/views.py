@@ -193,7 +193,7 @@ def delete_event(request, event_id):
 
     # Listázzuk az összes jövőbeli ismétlődő eseményt (7 napos léptékkel)
     future_events_ids = []  # Az események ID-ját tároljuk
-    current_time = timezone.now()
+    current_time = event.start_time
 
     # Egy hónap max előretekintés
     max_future_time = current_time + timedelta(days=30)
