@@ -6,9 +6,13 @@
     {{ form.as_p }}
     <button type="submit">Mentés</button>
   </form>
-  <form method="POST" action="{% url 'calendarapp:delete_event' event.id %}" onsubmit="return confirm('Biztosan törölni szeretnéd ezt az eseményt?');">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-danger mt-3">Esemény törlése</button>
+
+    <!-- Törlés gomb formba csomagolva -->
+  <form method="post" action="{% url 'calendarapp:delete_event' event.id %}" id="deleteEventForm">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Biztosan törölni akarod ezt az eseményt?');">
+      Esemény törlése
+    </button>
   </form>
 
   <a href="{% url 'calendarapp:calendar_view' %}">Vissza a naptárhoz</a>
