@@ -152,15 +152,85 @@ def unsubscribe_event(request):
         return JsonResponse({'status': 'error', 'message': 'Nem található a jelentkezés erre az eseményre.'}, status=404)
 
 
+from datetime import timedelta
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseForbidden
+from .models import Event
+from django.utils import timezone
+
+from datetime import timedelta
+from django.utils import timezone
+from .models import Event
+
+from datetime import timedelta
+from django.utils import timezone
+from .models import Event
+
+
+from datetime import timedelta
+from django.shortcuts import get_object_or_404, render, redirect
+from django.http import HttpResponseForbidden
+from .models import Event
+from django.utils import timezone
+
+from datetime import timedelta
+from django.utils import timezone
+from .models import Event
+
+from datetime import timedelta
+from django.utils import timezone
+from .models import Event
+
+
 @login_required
 @permission_required('calendarapp.delete_event', raise_exception=True)
 def delete_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
+
+    # Lekérjük az esemény időpontját
+    event_start = event.start_time
+    event_end = event.end_time
+
+    # Listázzuk az összes jövőbeli ismétlődő eseményt (7 napos léptékkel)
+    future_events_ids = []  # Az események ID-ját tároljuk
+    current_time = event.start_time
+
+    # Egy hónap max előretekintés
+    max_future_time = current_time + timedelta(days=30)
+
+    # Az események keresése, amik ugyanazon a napon és időpontban ismétlődnek
+    while event_start >= current_time and event_start <= max_future_time:
+        # Keressük meg az eseményt ugyanazon a napon és ugyanabban az időpontban
+        future_event = Event.objects.filter(
+            start_time__date=event_start.date(),
+            end_time__date=event_end.date()
+        )
+
+        # Az ID-kat tároljuk el
+        future_events_ids.extend(future_event.values_list('id', flat=True))
+
+        # Kiíratjuk, hogy miket találunk
+        print(f"Keresett esemény időpontja: {event_start} - {event_end}")
+        print(f"Talált események ID-k: {future_events_ids}")
+
+        # Hozzáadjuk a 7 napot a következő kereséshez
+        event_start += timedelta(days=7)
+        event_end += timedelta(days=7)
+
+    # Törlés végrehajtása
     if request.method == 'POST':
-        event.delete()
+        if 'delete_all' in request.POST:
+            # Ha az összes jövőbeli eseményt töröljük
+            Event.objects.filter(id__in=future_events_ids).delete()
+        elif 'delete_single' in request.POST:
+            # Ha csak ezt az egy eseményt töröljük
+            event.delete()
         return redirect('calendarapp:calendar_view')
-    return HttpResponseForbidden()  # Vagy valami más, ha nem akarod, hogy az URL elérhető legyen GET kérésre
+
+    return render(request, 'calendarapp/edit_event.html', {
+        'event': event,
+        'future_events_ids': future_events_ids  # Az ID-kat átadjuk a sablonnak
+    })
 
 
 @login_required
