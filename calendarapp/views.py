@@ -335,3 +335,32 @@ def event_attendance_summary(request):
         "selected_month": int(month),
         "selected_year": int(year)
     })
+
+from django.contrib.auth.models import User
+
+@login_required
+@user_passes_test(is_admin_or_group_leader)
+def user_attendance_summary(request):
+    month = request.GET.get("month", now().month)
+    year = request.GET.get("year", now().year)
+
+    # Lekérdezzük a felhasználók részvételét adott hónapra
+    attendance_records = Attendance.objects.filter(
+        event__start_time__year=year,
+        event__start_time__month=month
+    ).select_related('user', 'event')
+
+    # Adatok struktúrázása felhasználónként
+    user_attendance = {}
+    for record in attendance_records:
+        user = record.user
+        event = record.event
+        if user not in user_attendance:
+            user_attendance[user] = []
+        user_attendance[user].append(event)
+
+    return render(request, "calendarapp/user_summary.html", {
+        "user_attendance": user_attendance,
+        "selected_month": int(month),
+        "selected_year": int(year)
+    })

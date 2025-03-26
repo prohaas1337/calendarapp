@@ -2,6 +2,7 @@
 from django.urls import path
 from . import views
 from calendarapp.views import event_attendance_summary
+from calendarapp.views import user_attendance_summary
 
 app_name = 'calendarapp'
 
@@ -18,4 +19,5 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('cancel_registration/<int:event_id>/', views.cancel_registration, name='cancel_registration'),
     path("event-summary/", event_attendance_summary, name="event_summary"),
+    path("user-summary/", user_attendance_summary, name="user_summary"),
 ]
