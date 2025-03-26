@@ -29,3 +29,4 @@ class Event(models.Model):
 class Attendance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    checked_in = models.BooleanField(default=False)  # új mező
