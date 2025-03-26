@@ -1,0 +1,40 @@
+{% block content %}
+<h2>Események statisztikája - {{ selected_year }}. {{ selected_month }}</h2>
+
+<form method="get">
+    <label for="month">Hónap:</label>
+    <select name="month" id="month">
+        {% for month in "123456789101112" %}
+        <option value="{{ month }}" {% if selected_month == month|add:0 %}selected{% endif %}>{{ month }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="year">Év:</label>
+    <input type="number" name="year" id="year" value="{{ selected_year }}" min="2000" max="2100">
+    
+    <button type="submit">Lekérdezés</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Esemény</th>
+            <th>Dátum</th>
+            <th>Résztvevők száma</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in events %}
+        <tr>
+            <td>{{ event.title }}</td>
+            <td>{{ event.start_time }}</td>
+            <td>{{ event.attendee_count }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">Nincs esemény ebben a hónapban.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
