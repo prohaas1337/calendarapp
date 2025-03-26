@@ -308,3 +308,59 @@ def cancel_registration(request, event_id):
         messages.error(request, "Nem található jelentkezés az adott eseményre.")
 
     return redirect('calendarapp:profile')
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.utils.timezone import now
+from django.db.models import Count
+from datetime import datetime
+from calendarapp.models import Event, Attendance
+
+def is_admin_or_group_leader(user):
+    return user.is_authenticated and (user.is_superuser or user.groups.filter(name="edzo").exists())
+
+@login_required
+@user_passes_test(is_admin_or_group_leader)
+def event_attendance_summary(request):
+    month = request.GET.get("month", now().month)
+    year = request.GET.get("year", now().year)
+
+    events = Event.objects.filter(
+        start_time__year=year,
+        start_time__month=month
+    ).annotate(attendee_count=Count('attendance'))
+
+    return render(request, "calendarapp/event_summary.html", {
+        "events": events,
+        "selected_month": int(month),
+        "selected_year": int(year)
+    })
+
+from django.contrib.auth.models import User
+
+@login_required
+@user_passes_test(is_admin_or_group_leader)
+def user_attendance_summary(request):
+    month = request.GET.get("month", now().month)
+    year = request.GET.get("year", now().year)
+
+    # Lekérdezzük a felhasználók részvételét adott hónapra
+    attendance_records = Attendance.objects.filter(
+        event__start_time__year=year,
+        event__start_time__month=month
+    ).select_related('user', 'event')
+
+    # Adatok struktúrázása felhasználónként
+    user_attendance = {}
+    for record in attendance_records:
+        user = record.user
+        event = record.event
+        if user not in user_attendance:
+            user_attendance[user] = []
+        user_attendance[user].append(event)
+
+    return render(request, "calendarapp/user_summary.html", {
+        "user_attendance": user_attendance,
+        "selected_month": int(month),
+        "selected_year": int(year)
+    })
