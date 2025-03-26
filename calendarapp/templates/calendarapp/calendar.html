@@ -93,120 +93,139 @@
         }
         return cookieValue;
     }
-document.addEventListener('DOMContentLoaded', function() {
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        locale: 'hu',
-        timeZone: 'local',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        events: {
-            url: '/calendar/events/',
-            method: 'GET',
-            failure: function() {
-                alert('Hiba történt az események betöltése közben!');
-            }
-        },
-        eventDidMount: function(info) {
-            var eventEnd = info.event.end ? info.event.end : info.event.start;
-            var now = new Date();
-            if (eventEnd < now) {
-                info.el.style.opacity = '0.5';
-                info.el.classList.add('past-event');
-            }
-        },
-        eventClick: function(info) {
-            info.jsEvent.preventDefault();
-            var eventId = info.event.id;
-            var eventTitle = info.event.title;
-            $('#signupModalLabel').text(eventTitle);
-            $('#signupButton').data('event-id', eventId);
-            $('#cancelButton').data('event-id', eventId);
 
-            var eventEnd = info.event.end ? info.event.end : info.event.start;
-            var now = new Date();
-            if (eventEnd < now) {
-                $('#signupButton').prop('disabled', true);
-                $('#cancelButton').prop('disabled', true);
-            } else {
-                $('#signupButton').prop('disabled', false);
-                $('#cancelButton').prop('disabled', false);
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            locale: 'hu',
+            timeZone: 'local',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: {
+                url: '/calendar/events/',
+                method: 'GET',
+                failure: function() {
+                    alert('Hiba történt az események betöltése közben!');
+                }
+            },
+            eventDataTransform: function(eventData) {
+                var event = {
+                    id: eventData.id,
+                    title: eventData.title,
+                    start: eventData.start,
+                    end: eventData.end,
+                    description: eventData.description,
+                    className: eventData.user_is_attending ? 'attending-user' : '',  // Zöld háttér CSS osztály
+                };
+                return event;
+            },
+            eventDidMount: function(info) {
+                var eventEnd = info.event.end ? info.event.end : info.event.start;
+                var now = new Date();
+                if (eventEnd < now) {
+                    info.el.style.opacity = '0.5';
+                    info.el.classList.add('past-event');
+                }
+            },
+            editable: false,
+            droppable: false,
+            slotMinTime: '08:00:00',
+            slotMaxTime: '22:00:00',
+            firstDay: 1,
+            eventClick: function(info) {
+                info.jsEvent.preventDefault();
+                var eventId = info.event.id;
+                var eventTitle = info.event.title;
+                $('#signupModalLabel').text(eventTitle);
+                $('#signupButton').data('event-id', eventId);
+                $('#cancelButton').data('event-id', eventId);
+
+                var eventEnd = info.event.end ? info.event.end : info.event.start;
+                var now = new Date();
+                if (eventEnd < now) {
+                    $('#signupButton').prop('disabled', true);
+                    $('#cancelButton').prop('disabled', true);
+                } else {
+                    $('#signupButton').prop('disabled', false);
+                    $('#cancelButton').prop('disabled', false);
+                }
+                // Szerkesztés link beállítása
+                var editUrl = '/calendar/edit/' + eventId + '/';
+                $('#editEventLink').attr('href', editUrl);
+
+                $.ajax({
+                    url: '/calendar/events/' + eventId + '/',
+                    method: 'GET',
+                    success: function(response) {
+                        var attendeesList = response.attendees;
+                        var attendeesHtml = '<ul>';
+                        attendeesList.forEach(function(attendee) {
+                            attendeesHtml += '<li>' + attendee + '</li>';
+                        });
+                        attendeesHtml += '</ul>';
+                        $('#signupModal .modal-body').html('Jelentkezettek: ' + attendeesHtml);
+                    },
+                    error: function(xhr) {
+                        alert('Hiba történt a jelentkezettek betöltésekor: ' + xhr.responseText);
+                    }
+                });
+
+                $('#signupModal').modal('show');
             }
-            // Szerkesztés link beállítása
-            var editUrl = '/calendar/edit/' + eventId + '/';
-            $('#editEventLink').attr('href', editUrl);
+        });
+        calendar.render();
+
+        // Jelentkezés gomb
+        $('#signupButton').on('click', function() {
+            var eventId = $(this).data('eventId');  // Az event_id lekérése
 
             $.ajax({
-                url: '/calendar/events/' + eventId + '/',
-                method: 'GET',
+                url: '/calendar/signup/',
+                method: 'POST',
+                data: {
+                    'event_id': eventId  // Az event_id átadása a POST kérésben
+                },
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
                 success: function(response) {
-                    var attendeesList = response.attendees;
-                    var attendeesHtml = '<ul>';
-                    attendeesList.forEach(function(attendee) {
-                        attendeesHtml += '<li>' + attendee + '</li>';
-                    });
-                    attendeesHtml += '</ul>';
-                    $('#signupModal .modal-body').html('Jelentkezettek: ' + attendeesHtml);
+                    alert('Sikeres jelentkezés!');
+                    $('#signupModal').modal('hide');
                 },
                 error: function(xhr) {
-                    alert('Hiba történt a jelentkezettek betöltésekor: ' + xhr.responseText);
+                    alert('Hiba történt a jelentkezés során: ' + xhr.responseText);
                 }
             });
+        });
 
-            $('#signupModal').modal('show');
-        }
-    });
-    calendar.render();
-
-// Jelentkezés gomb
-$('#signupButton').on('click', function() {
-    var eventId = $(this).data('eventId');  // Az event_id lekérése
-
-    $.ajax({
-        url: '/calendar/signup/',
-        method: 'POST',
-        data: {
-            'event_id': eventId  // Az event_id átadása a POST kérésben
-        },
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        success: function(response) {
-            alert('Sikeres jelentkezés!');
-            $('#signupModal').modal('hide');
-        },
-        error: function(xhr) {
-            alert('Hiba történt a jelentkezés során: ' + xhr.responseText);
-        }
-    });
-});
-
-// Lemondás gomb
-$('#cancelButton').on('click', function() {
-    var eventId = $(this).data('eventId');
-    $.ajax({
-        url: '/calendar/cancel_signup/',
-        method: 'POST',
-        data: {
-            'event_id': eventId
-        },
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')  // Itt kerül be a CSRF token
-        },
-        success: function(response) {
-            alert('Sikeres lemondás!');
-            $('#signupModal').modal('hide');
-        },
-        error: function(xhr) {
-            alert('Hiba történt a lemondás során: ' + xhr.responseText);
-        }
-    });
-});
+        // Lemondás gomb
+        $('#cancelButton').on('click', function() {
+            var eventId = $(this).data('eventId');
+            $.ajax({
+                url: '/calendar/cancel_signup/',
+                method: 'POST',
+                data: {
+                    'event_id': eventId
+                },
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')  // Itt kerül be a CSRF token
+                },
+                success: function(response) {
+                    alert('Sikeres lemondás!');
+                    $('#signupModal').modal('hide');
+                },
+                error: function(xhr) {
+                    alert('Hiba történt a lemondás során: ' + xhr.responseText);
+                }
+            });
+        });
     });
 </script>
+
 
 </body>
 </html>
