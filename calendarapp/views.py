@@ -1,21 +1,28 @@
 #views.py
-from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
-from .models import Event, Attendance
 from django.http import JsonResponse
 from django.utils.dateparse import parse_datetime
 from django.contrib.auth.decorators import permission_required
-from django.shortcuts import get_object_or_404
-from django.shortcuts import render, redirect
-from .models import Event
 from .forms import EventForm
 from datetime import timedelta
-from django.shortcuts import get_object_or_404, render, redirect
-from datetime import timedelta
-from .models import Event
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.utils.timezone import now
+from django.db.models import Count
+from calendarapp.models import Event, Attendance
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+from .models import Event, Attendance
+from .utils import get_edzo_emails
+
 
 
 @login_required
@@ -111,6 +118,7 @@ def session_check_view(request):
     session_id = request.session.session_key
     return HttpResponse(f'Session ID: {session_id}')
 
+
 @login_required
 @csrf_protect
 @require_POST
@@ -119,21 +127,25 @@ def signup_event(request):
     if not event_id:
         return JsonResponse({'status': 'error', 'message': 'Hiányzik az event_id.'}, status=400)
 
-    try:
-        event = Event.objects.get(id=event_id)
-    except Event.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Az esemény nem található.'}, status=404)
+    event = get_object_or_404(Event, id=event_id)
 
-    # Ellenőrizzük, hogy a jelentkezési idő még nyitott-e
     if not event.is_signup_open():
         return JsonResponse({'status': 'error', 'message': 'A jelentkezési határidő lejárt.'}, status=400)
 
-    # Ellenőrizzük, hogy a felhasználó még nem jelentkezett-e
     attendance, created = Attendance.objects.get_or_create(user=request.user, event=event)
     if not created:
         return JsonResponse({'status': 'error', 'message': 'Már jelentkezett erre az eseményre!'}, status=400)
 
+    # Email küldése az edzőknek
+    subject = f"Új jelentkezés: {event.title}"
+    message = f"{request.user.username} jelentkezett az eseményre: {event.title}\nIdőpont: {event.start_time}"
+    recipient_list = get_edzo_emails()
+
+    if recipient_list:
+        send_mail(subject, message, None, recipient_list, fail_silently=False)
+
     return JsonResponse({'status': 'success'})
+
 
 @login_required
 @csrf_protect
@@ -146,13 +158,25 @@ def unsubscribe_event(request):
     try:
         attendance = Attendance.objects.get(user=request.user, event_id=event_id)
         event = attendance.event
-        # Lemondási határidő ellenőrzése
+
         if not event.is_cancel_allowed():
             return JsonResponse({'status': 'error', 'message': 'A lemondási határidő lejárt.'}, status=400)
+
         attendance.delete()
+
+        # Email küldése az edzőknek
+        subject = f"Jelentkezés visszavonva: {event.title}"
+        message = f"{request.user.username} visszavonta a jelentkezését az eseményről: {event.title}\nIdőpont: {event.start_time}"
+        recipient_list = get_edzo_emails()
+
+        if recipient_list:
+            send_mail(subject, message, None, recipient_list, fail_silently=False)
+
         return JsonResponse({'status': 'success'})
+
     except Attendance.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Nem található a jelentkezés erre az eseményre.'}, status=404)
+        return JsonResponse({'status': 'error', 'message': 'Nem található a jelentkezés erre az eseményre.'},
+                            status=404)
 
 
 @login_required
@@ -267,13 +291,6 @@ def edit_event(request, event_id):
     return render(request, 'calendarapp/edit_event.html', {'form': form, 'event': event})
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.timezone import now
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import Attendance, Event
-
-
 @login_required
 def profile_view(request):
     user = request.user
@@ -287,34 +304,34 @@ def profile_view(request):
         'future_events': future_events,
     })
 
-
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import Attendance, Event
+from django.shortcuts import redirect
 
 @login_required
 def cancel_registration(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     if not event.is_cancel_allowed():
         messages.error(request, "Az esemény túl közel van, már nem mondható le.")
-        return redirect('profile')
+        return redirect('calendarapp:profile')
 
     attendance = Attendance.objects.filter(user=request.user, event=event).first()
     if attendance:
         attendance.delete()
         messages.success(request, "Sikeresen lemondta az eseményt.")
+
+        # Email küldése az edzőknek
+        subject = f"Jelentkezés visszavonva: {event.title}"
+        message = f"{request.user.username} visszavonta a jelentkezését az eseményről: {event.title}\nIdőpont: {event.start_time}"
+        recipient_list = get_edzo_emails()
+
+        if recipient_list:
+            send_mail(subject, message, None, recipient_list, fail_silently=False)
+
     else:
         messages.error(request, "Nem található jelentkezés az adott eseményre.")
 
     return redirect('calendarapp:profile')
 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.utils.timezone import now
-from django.db.models import Count
-from datetime import datetime
-from calendarapp.models import Event, Attendance
 
 def is_admin_or_group_leader(user):
     return user.is_authenticated and (user.is_superuser or user.groups.filter(name="edzo").exists())
@@ -336,7 +353,6 @@ def event_attendance_summary(request):
         "selected_year": int(year)
     })
 
-from django.contrib.auth.models import User
 
 @login_required
 @user_passes_test(is_admin_or_group_leader)
@@ -364,3 +380,5 @@ def user_attendance_summary(request):
         "selected_month": int(month),
         "selected_year": int(year)
     })
+
+
