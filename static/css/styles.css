@@ -1,3 +1,7 @@
+.past-event {
+    pointer-events: none;
+}
+
 .attending-user {
     background-color: #28a745;  /* Zöld háttér */
     color: white;
