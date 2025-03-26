@@ -168,6 +168,19 @@
                         });
                         attendeesHtml += '</ul>';
                         $('#signupModal .modal-body').html('Jelentkezettek: ' + attendeesHtml);
+			// Jelentkezés/Lemondás gombok engedélyezése/letiltása
+						if (response.is_signup_open) {
+							$('#signupButton').prop('disabled', false);
+						} else {
+							$('#signupButton').prop('disabled', true).text('Jelentkezés');
+						}
+
+						if (response.is_cancel_allowed) {
+							$('#signupButton').prop('disabled', false);
+							$('#cancelButton').prop('disabled', false);
+						} else {
+							$('#cancelButton').prop('disabled', true).text('Lemondás');
+						}
                     },
                     error: function(xhr) {
                         alert('Hiba történt a jelentkezettek betöltésekor: ' + xhr.responseText);
