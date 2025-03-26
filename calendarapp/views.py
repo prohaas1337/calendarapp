@@ -307,4 +307,4 @@ def cancel_registration(request, event_id):
     else:
         messages.error(request, "Nem található jelentkezés az adott eseményre.")
 
-    return redirect('calendarapp/profile.html')
+    return redirect('calendarapp:profile')
