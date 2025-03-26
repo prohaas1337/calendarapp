@@ -1,0 +1,33 @@
+{% block content %}
+  <h1>Profilom</h1>
+
+  <h2>Múltbeli események</h2>
+  <ul>
+    {% for event in past_events %}
+      <li>
+        {{ event.title }} - {{ event.start_time|date:"Y-m-d H:i" }} - {{ event.end_time|date:"H:i" }}
+      </li>
+    {% empty %}
+      <li>Nincsenek múltbeli események.</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Jövőbeli események</h2>
+  <ul>
+    {% for event in future_events %}
+      <li>
+        {{ event.title }} - {{ event.start_time|date:"Y-m-d H:i" }} - {{ event.end_time|date:"H:i" }}
+        {% if event.is_cancel_allowed %}
+          <form method="post" action="{% url 'calendarapp:cancel_registration' event.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Lemondás</button>
+          </form>
+        {% else %}
+          <span>(Lemondás nem lehetséges)</span>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li>Nincsenek jövőbeli események.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

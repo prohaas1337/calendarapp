@@ -13,6 +13,9 @@ from django.shortcuts import render, redirect
 from .models import Event
 from .forms import EventForm
 from datetime import timedelta
+from django.shortcuts import get_object_or_404, render, redirect
+from datetime import timedelta
+from .models import Event
 
 
 @login_required
@@ -152,36 +155,6 @@ def unsubscribe_event(request):
         return JsonResponse({'status': 'error', 'message': 'Nem található a jelentkezés erre az eseményre.'}, status=404)
 
 
-from datetime import timedelta
-from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponseForbidden
-from .models import Event
-from django.utils import timezone
-
-from datetime import timedelta
-from django.utils import timezone
-from .models import Event
-
-from datetime import timedelta
-from django.utils import timezone
-from .models import Event
-
-
-from datetime import timedelta
-from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponseForbidden
-from .models import Event
-from django.utils import timezone
-
-from datetime import timedelta
-from django.utils import timezone
-from .models import Event
-
-from datetime import timedelta
-from django.utils import timezone
-from .models import Event
-
-
 @login_required
 @permission_required('calendarapp.delete_event', raise_exception=True)
 def delete_event(request, event_id):
@@ -292,3 +265,46 @@ def edit_event(request, event_id):
     else:
         form = EventForm(instance=event)
     return render(request, 'calendarapp/edit_event.html', {'form': form, 'event': event})
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.timezone import now
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Attendance, Event
+
+
+@login_required
+def profile_view(request):
+    user = request.user
+    registrations = Attendance.objects.filter(user=user).select_related('event')
+
+    past_events = [att.event for att in registrations if att.event.end_time < now()]
+    future_events = [att.event for att in registrations if att.event.end_time >= now()]
+
+    return render(request, 'calendarapp/profile.html', {
+        'past_events': past_events,
+        'future_events': future_events,
+    })
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Attendance, Event
+
+@login_required
+def cancel_registration(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    if not event.is_cancel_allowed():
+        messages.error(request, "Az esemény túl közel van, már nem mondható le.")
+        return redirect('profile')
+
+    attendance = Attendance.objects.filter(user=request.user, event=event).first()
+    if attendance:
+        attendance.delete()
+        messages.success(request, "Sikeresen lemondta az eseményt.")
+    else:
+        messages.error(request, "Nem található jelentkezés az adott eseményre.")
+
+    return redirect('calendarapp:profile')
