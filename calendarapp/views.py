@@ -13,6 +13,9 @@ from django.shortcuts import render, redirect
 from .models import Event
 from .forms import EventForm
 from datetime import timedelta
+from django.shortcuts import get_object_or_404, render, redirect
+from datetime import timedelta
+from .models import Event
 
 
 @login_required
@@ -150,36 +153,6 @@ def unsubscribe_event(request):
         return JsonResponse({'status': 'success'})
     except Attendance.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Nem található a jelentkezés erre az eseményre.'}, status=404)
-
-
-from datetime import timedelta
-from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponseForbidden
-from .models import Event
-from django.utils import timezone
-
-from datetime import timedelta
-from django.utils import timezone
-from .models import Event
-
-from datetime import timedelta
-from django.utils import timezone
-from .models import Event
-
-
-from datetime import timedelta
-from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponseForbidden
-from .models import Event
-from django.utils import timezone
-
-from datetime import timedelta
-from django.utils import timezone
-from .models import Event
-
-from datetime import timedelta
-from django.utils import timezone
-from .models import Event
 
 
 @login_required
