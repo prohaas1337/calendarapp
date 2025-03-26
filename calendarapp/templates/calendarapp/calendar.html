@@ -135,6 +135,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 $('#signupButton').prop('disabled', false);
                 $('#cancelButton').prop('disabled', false);
             }
+            // Szerkesztés link beállítása
+            var editUrl = '/calendar/edit/' + eventId + '/';
+            $('#editEventLink').attr('href', editUrl);
 
             $.ajax({
                 url: '/calendar/events/' + eventId + '/',
