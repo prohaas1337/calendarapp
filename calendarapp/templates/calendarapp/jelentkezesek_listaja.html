@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="hu">
-<head>
-    <meta charset="UTF-8">
-    <title>Jelentkezési statisztika</title>
-</head>
-<body>
-    <h1>Felhasználók jelentkezései és checkinjei</h1>
-    <table border="1">
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Felhasználók jelentkezései és jelenléte</h1>
+    <table class="statistics-table">
         <thead>
             <tr>
                 <th>Felhasználó</th>
@@ -24,5 +20,5 @@
             {% endfor %}
         </tbody>
     </table>
-</body>
-</html>
+<a href="{% url 'calendarapp:calendar_view' %}" class="btn btn-link">Vissza a naptárhoz</a>
+{% endblock %}
