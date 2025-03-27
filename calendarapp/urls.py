@@ -21,4 +21,5 @@ urlpatterns = [
     path("event-summary/", event_attendance_summary, name="event_summary"),
     path("user-summary/", user_attendance_summary, name="user_summary"),
     path('checkin/<int:event_id>/', views.event_checkin_view, name='checkin_event'),
+    path('statisztika/', views.jelentkezesek_listaja, name='jelentkezesek_listaja'),
 ]
