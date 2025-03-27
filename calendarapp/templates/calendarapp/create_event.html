@@ -1,17 +1,10 @@
-<!DOCTYPE html>
-<html lang="hu">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Új Óra Létrehozása</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
     <h1>Új Óra Létrehozása</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Esemény létrehozása</button>
     </form>
-    </form>
-</body>
-</html>
+{% endblock %}

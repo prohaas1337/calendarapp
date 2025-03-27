@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Jelentkezési statisztika</title>
+</head>
+<body>
+    <h1>Felhasználók jelentkezései és checkinjei</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Felhasználó</th>
+                <th>Jelentkezések száma</th>
+                <th>Check-in-ek száma</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for adat in statisztika %}
+                <tr>
+                    <td>{{ adat.user__username }}</td>
+                    <td>{{ adat.jelentkezesek_szama }}</td>
+                    <td>{{ adat.checkinek_szama }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

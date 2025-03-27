@@ -405,3 +405,22 @@ def event_checkin_view(request, event_id):
         "event": event,
         "attendances": attendances,
     })
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.http import require_http_methods
+from django.db.models import Count, Q
+from .models import Attendance
+
+@user_passes_test(is_admin_or_group_leader)
+@login_required
+@require_http_methods(["GET"])
+def jelentkezesek_listaja(request):
+    statisztika = Attendance.objects.values('user__username').annotate(
+        jelentkezesek_szama=Count('id'),
+        checkinek_szama=Count('id', filter=Q(checked_in=True))
+    ).order_by('-jelentkezesek_szama')
+
+    return render(request, "calendarapp/jelentkezesek_listaja.html", {
+        "statisztika": statisztika
+    })
