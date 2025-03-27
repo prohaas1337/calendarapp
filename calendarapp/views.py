@@ -382,3 +382,26 @@ def user_attendance_summary(request):
     })
 
 
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Event, Attendance
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+
+@user_passes_test(is_admin_or_group_leader)
+@login_required
+@require_http_methods(["GET", "POST"])
+def event_checkin_view(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    attendances = Attendance.objects.filter(event=event).select_related('user')
+
+    if request.method == "POST":
+        for attendance in attendances:
+            checkbox_name = f"checkin_{attendance.user.id}"
+            attendance.checked_in = checkbox_name in request.POST
+            attendance.save()
+        return redirect('calendarapp:checkin_event', event_id=event.id)
+
+    return render(request, "calendarapp/event_checkin.html", {
+        "event": event,
+        "attendances": attendances,
+    })
