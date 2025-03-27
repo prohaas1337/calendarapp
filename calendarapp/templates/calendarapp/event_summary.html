@@ -1,7 +1,8 @@
+{% extends 'base.html' %}
 {% block content %}
 <h2>Események statisztikája - {{ selected_year }}. {{ selected_month }}</h2>
 
-<form method="get">
+<form method="get" class="filters-form">
     <label for="month">Hónap:</label>
     <select name="month" id="month">
         {% for month in "123456789101112" %}
@@ -11,11 +12,11 @@
 
     <label for="year">Év:</label>
     <input type="number" name="year" id="year" value="{{ selected_year }}" min="2000" max="2100">
-    
-    <button type="submit">Lekérdezés</button>
+
+    <button type="submit" class="btn-submit">Lekérdezés</button>
 </form>
 
-<table>
+<table class="events-table">
     <thead>
         <tr>
             <th>Esemény</th>
@@ -37,4 +38,5 @@
         {% endfor %}
     </tbody>
 </table>
+<a href="{% url 'calendarapp:calendar_view' %}" class="btn btn-link">Vissza a naptárhoz</a>
 {% endblock %}

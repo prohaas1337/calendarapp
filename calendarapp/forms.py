@@ -28,6 +28,15 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = ['title', 'description', 'start_time', 'end_time', 'repeat_weekday', 'repeat_until','max_capacity', 'cancel_limit_hours',
                   'signup_limit_hours']
+        labels = {
+            'title': 'Cím',
+            'description': 'Leírás',
+            'start_time': 'Kezdés időpontja',
+            'end_time': 'Befejezés időpontja',
+            'max_capacity': 'Maximális létszám',
+            'cancel_limit_hours': 'Lemondási határidő (előtte, órában)',
+            'signup_limit_hours': 'Jelentkezési határidő (előtte, órában)',
+        }
         widgets = {
             'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'end_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
