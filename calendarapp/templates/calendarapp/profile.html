@@ -1,3 +1,5 @@
+{% extends 'base.html' %}
+
 {% block content %}
   <h1>Profilom</h1>
 
@@ -21,13 +23,13 @@
   </ul>
 
   <h2>Múltbeli események</h2>
-    <ul>
-      {% for event in past_events %}
-        <li>
-          {{ event.title }} - {{ event.start_time|date:"Y-m-d H:i" }} - {{ event.end_time|date:"H:i" }}
-        </li>
-      {% empty %}
-        <li>Nincsenek múltbeli események.</li>
-      {% endfor %}
-    </ul>
+  <ul>
+    {% for event in past_events %}
+      <li>
+        {{ event.title }} - {{ event.start_time|date:"Y-m-d H:i" }} - {{ event.end_time|date:"H:i" }}
+      </li>
+    {% empty %}
+      <li>Nincsenek múltbeli események.</li>
+    {% endfor %}
+  </ul>
 {% endblock %}
