@@ -52,6 +52,7 @@
                 {% endif %}
                 {% if perms.calendarapp.change_event %}
                     <a href="#" id="editEventLink" class="btn btn-warning">Óra szerkesztése</a>
+                    <a href="#" id="checkinEventLink" class="btn btn-warning">Check-in</a>
                 {% endif %}
 
               </div>
@@ -156,6 +157,9 @@
                 // Szerkesztés link beállítása
                 var editUrl = '/calendar/edit/' + eventId + '/';
                 $('#editEventLink').attr('href', editUrl);
+                // checkin link beállítása
+                var checkinUrl = '/calendar/checkin/' + eventId + '/';
+                $('#checkinEventLink').attr('href', checkinUrl);
 
                 $.ajax({
                     url: '/calendar/events/' + eventId + '/',
