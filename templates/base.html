@@ -1,5 +1,6 @@
 <!-- base.html -->
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -54,7 +55,8 @@
         <li class="nav-item">
           <a class="nav-link" href="{% url 'account_login' %}">Bejelentkezés</a>
         </li>
-        <li class="nav-item">
+            {% load socialaccount %}
+                  <li class="nav-item">
           <a class="nav-link" href="{% url 'account_signup' %}">Regisztráció</a>
         </li>
         {% endif %}
