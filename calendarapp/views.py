@@ -372,15 +372,21 @@ def user_attendance_summary(request):
         user = record.user
         event = record.event
         if user not in user_attendance:
-            user_attendance[user] = []
-        user_attendance[user].append(event)
+            user_attendance[user] = {
+                'events': [],
+                'total_count': 0,  # Jelentkezések száma
+                'checked_in_count': 0  # Részvételek száma (checked_in=True)
+            }
+        user_attendance[user]['events'].append(event)
+        user_attendance[user]['total_count'] += 1
+        if record.checked_in:
+            user_attendance[user]['checked_in_count'] += 1
 
     return render(request, "calendarapp/user_summary.html", {
         "user_attendance": user_attendance,
         "selected_month": int(month),
         "selected_year": int(year)
     })
-
 
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Event, Attendance

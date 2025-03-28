@@ -211,3 +211,21 @@ h2 {
     color: #0c5460;
     border: 1px solid #bee5eb;
 }
+/* Alapértelmezett rejtés a további órákhoz */
+.more-events {
+    display: none;
+}
+
+/* A gombhoz egy kis stílus */
+button.show-more {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button.show-more:hover {
+    background-color: #0056b3;
+}
