@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+load_dotenv()  # Betölti a .env fájl tartalmát
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,6 +61,7 @@ MIDDLEWARE = [
 
     # allauth kötelező middleware
     'allauth.account.middleware.AccountMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = '_core.urls'
@@ -123,7 +125,7 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-TIME_ZONE = 'Europe/Budapest'
+#TIME_ZONE = 'Europe/Budapest'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -131,9 +133,16 @@ TIME_ZONE = 'Europe/Budapest'
 
 STATIC_URL = 'static/'
 
+#STATICFILES_DIRS = [
+#    BASE_DIR / "static",
+#]
+
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    os.path.join(BASE_DIR, "static"),  # ez az, ahonnan szedi a fájlokat (pl. static/css, static/js)
 ]
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # ide fogja bemásolni őket a collectstatic
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
