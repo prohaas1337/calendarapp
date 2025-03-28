@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+load_dotenv()  # Betölti a .env fájl tartalmát
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
 ]
 
 MIDDLEWARE = [
@@ -60,6 +62,7 @@ MIDDLEWARE = [
 
     # allauth kötelező middleware
     'allauth.account.middleware.AccountMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = '_core.urls'
@@ -116,14 +119,14 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'hu'
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_TZ = True
-TIME_ZONE = 'Europe/Budapest'
+#TIME_ZONE = 'Europe/Budapest'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -131,9 +134,16 @@ TIME_ZONE = 'Europe/Budapest'
 
 STATIC_URL = 'static/'
 
+#STATICFILES_DIRS = [
+#    BASE_DIR / "static",
+#]
+
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    os.path.join(BASE_DIR, "static"),  # ez az, ahonnan szedi a fájlokat (pl. static/css, static/js)
 ]
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # ide fogja bemásolni őket a collectstatic
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -142,7 +152,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ###ALLAUTH
 # Kötelező: site ID beállítása
-SITE_ID = 1
+SITE_ID = 2
 
 # Authentication backends (így a Django admin is működik):
 AUTHENTICATION_BACKENDS = [
@@ -169,3 +179,16 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': {
+        'METHOD': 'oauth2',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'FIELDS': ['id', 'email', 'name', 'first_name', 'last_name'],
+        'EXCHANGE_TOKEN': True,
+        'LOCALE_FUNC': lambda request: 'en_US',
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v18.0',  # Használd az aktuális Facebook Graph API verziót
+    }
+}

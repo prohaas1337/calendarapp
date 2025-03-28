@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
 
 # Munkakönyvtár létrehozása
 WORKDIR /app
+COPY . /app
 
 # requirements.txt bemásolása
 COPY requirements.txt .
@@ -22,6 +23,9 @@ RUN pip install --upgrade pip --no-cache-dir && pip install --no-cache-dir -r re
 
 # Teljes projekt bemásolása
 COPY . .
+
+# Statikus fájlok összegyűjtése
+RUN python manage.py collectstatic --noinput
 
 # Port kinyitása (pl. 8000, ha a runserver-t használod)
 EXPOSE 8000
