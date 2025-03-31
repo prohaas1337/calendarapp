@@ -36,14 +36,6 @@
           </div>
           <div class="modal-body">
             <p>Ez az esemény {{ event.start_time }} kezdődik. Biztosan törölni akarod?</p>
-            <p>Ez a következő jövőbeli eseményeket érintheti:</p>
-            <ul>
-              {% for future_event in future_events %}
-                <li>{{ future_event.start_time }}</li>
-              {% empty %}
-                <li>Nincsenek jövőbeli események.</li>
-              {% endfor %}
-            </ul>
 
             <form method="post" action="{% url 'calendarapp:delete_event' event.id %}" id="deleteEventForm">
               {% csrf_token %}
