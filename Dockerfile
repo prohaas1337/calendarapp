@@ -28,10 +28,10 @@ COPY . .
 RUN python manage.py collectstatic --noinput
 
 # Port kinyitása (pl. 8000, ha a runserver-t használod)
-EXPOSE 8000
+EXPOSE 8080
 
 # A gunicorn telepítése
 RUN pip install gunicorn
 
 # A parancs a gunicorn indításához
-CMD ["gunicorn", "--workers", "3", "--bind", "0.0.0.0:8000", "_core.wsgi:application"]
+CMD ["gunicorn", "--workers", "3", "--bind", "0.0.0.0:8080", "_core.wsgi:application"]

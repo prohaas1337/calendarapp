@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["naptar.pr0haas.win","www.naptar.pr0haas.win","127.0.0.1","localhost","172.17.0.0/16"]
 
 
 # Application definition
