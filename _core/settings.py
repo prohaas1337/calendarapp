@@ -128,12 +128,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'hu'
 
-TIME_ZONE = 'UTC'
+#TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_TZ = True
-#TIME_ZONE = 'Europe/Budapest'
+TIME_ZONE = 'Europe/Budapest'
 
 
 # Static files (CSS, JavaScript, Images)
