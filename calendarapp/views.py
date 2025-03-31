@@ -59,7 +59,7 @@ def calendar_view(request):
 
     return render(request, 'calendarapp/calendar.html', context)
 
-
+@login_required
 def event_detail(request, event_id):
     try:
         event = Event.objects.get(id=event_id)
@@ -82,7 +82,7 @@ def event_detail(request, event_id):
     except Event.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Az esemény nem található.'}, status=404)
 
-
+@login_required
 def events_api(request):
     start = request.GET.get('start')
     end = request.GET.get('end')
@@ -112,11 +112,6 @@ def events_api(request):
     print(event_list)  # Logoljuk az event_list-et a konzolra
 
     return JsonResponse(event_list, safe=False)
-
-
-def session_check_view(request):
-    session_id = request.session.session_key
-    return HttpResponse(f'Session ID: {session_id}')
 
 
 @login_required
@@ -295,6 +290,13 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Attendance
 from django.utils.timezone import now
+from allauth.socialaccount.models import SocialAccount
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Attendance
+from django.utils.timezone import now
+from allauth.socialaccount.models import SocialAccount
 
 @login_required
 def profile_view(request):
@@ -304,16 +306,22 @@ def profile_view(request):
     past_events = [att.event for att in registrations if att.event.end_time < now()]
     future_events = [att.event for att in registrations if att.event.end_time >= now()]
 
-    # Facebook adatok lekérése (név és profilkép URL)
-    user_data = request.user.socialaccount_set.get(provider='facebook').extra_data
-    name = user_data.get('name')
-    picture_url = user_data.get('picture', {}).get('data', {}).get('url')
+    # Check if the user has a linked Facebook account
+    try:
+        social_account = user.socialaccount_set.get(provider='facebook')
+        user_data = social_account.extra_data
+        name = user_data.get('name')
+        picture_url = user_data.get('picture', {}).get('data', {}).get('url')
+    except SocialAccount.DoesNotExist:
+        # If no Facebook account is linked, use the default username
+        name = user.username  # Default username from allauth registration
+        picture_url = None
 
     return render(request, 'calendarapp/profile.html', {
         'past_events': past_events,
         'future_events': future_events,
         'name': name,
-        'picture_url': picture_url,  # Profilkép URL-je
+        'picture_url': picture_url,  # Profile picture URL
     })
 
 from django.contrib import messages
