@@ -174,6 +174,25 @@ def unsubscribe_event(request):
                             status=404)
 
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required, permission_required
+from .models import Event
+
+@login_required
+@permission_required('calendarapp.delete_event', raise_exception=True)
+def single_delete(request, event_id):
+    # Az esemény lekérése az ID alapján
+    event = get_object_or_404(Event, id=event_id)
+
+    # Ha POST kérés érkezik, akkor töröljük az eseményt
+    if request.method == 'POST':
+        event.delete()
+        return redirect('calendarapp:calendar_view')  # Visszairányítás a naptár nézetre
+
+    # Ha nem POST, akkor csak a törlés megerősítését kérjük
+    return render(request, 'calendarapp/confirm_delete.html', {'event': event})
+
+
 @login_required
 @permission_required('calendarapp.delete_event', raise_exception=True)
 def delete_event(request, event_id):
