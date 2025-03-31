@@ -9,8 +9,8 @@ class Event(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
-    max_capacity = models.PositiveIntegerField(default=10)
-    cancel_limit_hours = models.PositiveIntegerField(default=24)
+    max_capacity = models.PositiveIntegerField(default=18)
+    cancel_limit_hours = models.PositiveIntegerField(default=3)
     signup_limit_hours = models.PositiveIntegerField(default=0)  # 0 = mindig lehet jelentkezni
 
     def is_signup_open(self):

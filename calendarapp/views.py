@@ -174,6 +174,25 @@ def unsubscribe_event(request):
                             status=404)
 
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required, permission_required
+from .models import Event
+
+@login_required
+@permission_required('calendarapp.delete_event', raise_exception=True)
+def single_delete(request, event_id):
+    # Az esemény lekérése az ID alapján
+    event = get_object_or_404(Event, id=event_id)
+
+    # Ha POST kérés érkezik, akkor töröljük az eseményt
+    if request.method == 'POST':
+        event.delete()
+        return redirect('calendarapp:calendar_view')  # Visszairányítás a naptár nézetre
+
+    # Ha nem POST, akkor csak a törlés megerősítését kérjük
+    return render(request, 'calendarapp/confirm_delete.html', {'event': event})
+
+
 @login_required
 @permission_required('calendarapp.delete_event', raise_exception=True)
 def delete_event(request, event_id):
@@ -235,11 +254,9 @@ def create_event(request):
             repeat_weekday = int(form.cleaned_data['repeat_weekday'])
             repeat_until = form.cleaned_data['repeat_until']
 
-            # Kezdő dátum
             start_datetime = form.cleaned_data['start_time']
             end_datetime = form.cleaned_data['end_time']
 
-            # Meghatározzuk a vége dátumot
             if repeat_until == '1m':
                 end_date_limit = start_datetime + timedelta(days=30)
             elif repeat_until == '3m':
@@ -249,8 +266,23 @@ def create_event(request):
             else:
                 end_date_limit = start_datetime  # csak egy alkalom
 
-            # Először beállítjuk az első alkalmat ha a nap egyezik
-            current_date = start_datetime
+            # Első esemény mentése
+            Event.objects.create(
+                title=event.title,
+                description=event.description,
+                start_time=start_datetime,
+                end_time=end_datetime,
+                max_capacity=event.max_capacity,
+                cancel_limit_hours=event.cancel_limit_hours,
+                signup_limit_hours=event.signup_limit_hours
+            )
+
+            # Ha nincs ismétlés, nincs további teendő
+            if repeat_until == '0':
+                return redirect('calendarapp:calendar_view')
+
+            # További ismétlődő események létrehozása
+            current_date = start_datetime + timedelta(days=1)
             while current_date <= end_date_limit:
                 if current_date.weekday() == repeat_weekday:
                     Event.objects.create(
@@ -268,7 +300,6 @@ def create_event(request):
     else:
         form = EventForm()
     return render(request, 'calendarapp/create_event.html', {'form': form})
-
 
 
 

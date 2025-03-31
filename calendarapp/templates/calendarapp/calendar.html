@@ -30,10 +30,8 @@
         <button type="button" class="btn btn-success" id="signupButton">Jelentkezem</button>
         <button type="button" class="btn btn-danger" id="cancelButton">Lemondom</button>
         {% if perms.calendarapp.delete_event %}
-            <form method="post" action="{% url 'calendarapp:delete_event' 0 %}" id="deleteEventForm">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Óra törlése</button>
-            </form>
+                <a href="#" id="deleteEventLink" class="btn btn-danger">Óra törlése</button></a>
         {% endif %}
         {% if perms.calendarapp.change_event %}
             <a href="#" id="editEventLink" class="btn btn-warning">Óra szerkesztése</a>
@@ -152,6 +150,9 @@
                 // checkin link beállítása
                 var checkinUrl = '/calendar/checkin/' + eventId + '/';
                 $('#checkinEventLink').attr('href', checkinUrl);
+                //törlés
+                var deleteUrl = '/calendar/delete_event/' + eventId + '/';
+                $('#deleteEventLink').attr('href', deleteUrl);
 
                 $.ajax({
                     url: '/calendar/events/' + eventId + '/',
