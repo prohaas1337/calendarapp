@@ -26,11 +26,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["naptar.pr0haas.win","www.naptar.pr0haas.win","127.0.0.1","localhost","172.17.0.0/16"]
+ALLOWED_HOSTS = ["naptar.pr0haas.win","www.naptar.pr0haas.win","127.0.0.1","localhost"]
 
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://naptar.pr0haas.win",
+    "https://www.naptar.pr0haas.win"
+]
+SECURE_SSL_REDIRECT = True  # Automatikusan átirányít HTTP-ről HTTPS-re
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Reverse proxy esetén kell
+CSRF_COOKIE_SECURE = True  # Csak HTTPS-en küldhető CSRF token
+SESSION_COOKIE_SECURE = True  # Csak HTTPS-en érvényes a session cookie
 # Application definition
 
 INSTALLED_APPS = [
@@ -183,9 +190,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'METHOD': 'oauth2',
-        'SCOPE': ['email', 'public_profile'],
+        'SCOPE': ['public_profile'],
         'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
-        'FIELDS': ['id', 'email', 'name', 'first_name', 'last_name'],
+        'FIELDS': ['id', 'name', 'first_name', 'last_name', 'picture'],  # Profilkép hozzáadása
         'EXCHANGE_TOKEN': True,
         'LOCALE_FUNC': lambda request: 'en_US',
         'VERIFIED_EMAIL': False,

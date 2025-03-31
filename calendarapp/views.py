@@ -291,6 +291,11 @@ def edit_event(request, event_id):
     return render(request, 'calendarapp/edit_event.html', {'form': form, 'event': event})
 
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Attendance
+from django.utils.timezone import now
+
 @login_required
 def profile_view(request):
     user = request.user
@@ -299,9 +304,16 @@ def profile_view(request):
     past_events = [att.event for att in registrations if att.event.end_time < now()]
     future_events = [att.event for att in registrations if att.event.end_time >= now()]
 
+    # Facebook adatok lekérése (név és profilkép URL)
+    user_data = request.user.socialaccount_set.get(provider='facebook').extra_data
+    name = user_data.get('name')
+    picture_url = user_data.get('picture', {}).get('data', {}).get('url')
+
     return render(request, 'calendarapp/profile.html', {
         'past_events': past_events,
         'future_events': future_events,
+        'name': name,
+        'picture_url': picture_url,  # Profilkép URL-je
     })
 
 from django.contrib import messages

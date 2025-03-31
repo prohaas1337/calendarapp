@@ -7,3 +7,4 @@ def profile(request):
 
 def index(request):
     return render(request, 'account/index.html')
+

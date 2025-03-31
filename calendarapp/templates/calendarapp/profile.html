@@ -3,6 +3,16 @@
 {% block content %}
   <h1>Profilom</h1>
 
+  <!-- Felhasználói adatok -->
+  <div>
+    <h3>{{ name }}</h3>
+    {% if picture_url %}
+      <img src="{{ picture_url }}" alt="Profile Picture" style="max-width: 150px; max-height: 150px;">
+    {% else %}
+      <p>Profilkép nem elérhető.</p>
+    {% endif %}
+  </div>
+
   <h2>Jövőbeli események</h2>
   <ul>
     {% for event in future_events %}
