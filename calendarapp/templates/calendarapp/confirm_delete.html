@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Biztosan törölni szeretnéd az eseményt?</h1>
+  <p><strong>{{ event.title }}</strong></p>
+  <p>{{ event.description }}</p>
+  <p>{{ event.start_time }} - {{ event.end_time }}</p>
+  
+  <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Igen, törlés</button>
+      <a href="{% url 'calendarapp:calendar_view' %}" class="btn btn-secondary">Mégse</a>
+  </form>
+{% endblock %}
