@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["naptar.pr0haas.win","www.naptar.pr0haas.win","127.0.0.1","localhost"]
 
@@ -34,7 +34,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://naptar.pr0haas.win",
     "https://www.naptar.pr0haas.win"
 ]
-SECURE_SSL_REDIRECT = False  # Automatikusan átirányít HTTP-ről HTTPS-re
+SECURE_SSL_REDIRECT = True  # Automatikusan átirányít HTTP-ről HTTPS-re
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Reverse proxy esetén kell
 CSRF_COOKIE_SECURE = True  # Csak HTTPS-en küldhető CSRF token
 SESSION_COOKIE_SECURE = True  # Csak HTTPS-en érvényes a session cookie

@@ -68,7 +68,7 @@
             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg" aria-labelledby="navbarDropdown">
                 {% url 'account_email' as email_url_ %}
                 {% if email_url_ %}
-                    <li><a class="dropdown-item" href="{{ email_url_ }}">{% trans "Change Email" %}</a></li>
+                    <li><a class="dropdown-item" href="{{ email_url_ }}">{% trans "Email beállítások" %}</a></li>
                 {% endif %}
                 {% url 'account_change_password' as change_password_url_ %}
                 {% if change_password_url_ %}

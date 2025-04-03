@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.utils.dateparse import parse_datetime
 from django.contrib.auth.decorators import permission_required
 from .forms import EventForm
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.shortcuts import render
@@ -22,19 +22,36 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from .models import Event, Attendance
 from .utils import get_edzo_emails
-
+from django.utils.timezone import make_aware, localtime
+from django.utils.timezone import make_aware
 
 
 @login_required
 def calendar_view(request):
-    today = now()
-    start_of_week = today - timedelta(days=today.weekday())  # Hétfő
+    today = now().date()
+    current_user = request.user
+    # Hét kezdete és vége
+    start_of_week = today - timedelta(days=today.weekday())  # Hétfő (mostantól korrekt)
     end_of_week = start_of_week + timedelta(days=6)  # Vasárnap
 
-    events = Event.objects.filter(start_time__gte=start_of_week, end_time__lte=end_of_week)
+    # Időzóna figyelembevételével datetime objektummá alakítás
+    start_of_week = make_aware(datetime.combine(start_of_week, datetime.min.time()))
+    end_of_week = make_aware(datetime.combine(end_of_week, datetime.max.time()))
+
+    if current_user.is_superuser or current_user.groups.filter(name="edzo").exists():
+        events = Event.objects.all()
+    else:
+        # Sima user csak a vasárnaptól vasárnapig terjedő eseményeket látja
+        events = Event.objects.filter(
+            start_time__gte=start_of_week,
+            start_time__lte=end_of_week
+        )
 
     events_list = []
     current_user = request.user  # Aktuálisan bejelentkezett felhasználó
+
+    #print("Start of week:", start_of_week)
+    #print("End of week:", end_of_week)
 
     for event in events:
         # Lekérdezzük a felhasználókat, akik jelentkeztek
@@ -56,6 +73,8 @@ def calendar_view(request):
         'end_of_week': end_of_week,
         'events': events_list,
     }
+    #for event in events:
+    #    print(f"Esemény: {event.title}, Kezdés: {event.start_time}, Befejezés: {event.end_time}")
 
     return render(request, 'calendarapp/calendar.html', context)
 
@@ -84,18 +103,22 @@ def event_detail(request, event_id):
 
 @login_required
 def events_api(request):
-    start = request.GET.get('start')
-    end = request.GET.get('end')
+    current_user = request.user
+    today = now().date()
+    start_of_week = today - timedelta(days=today.weekday())  # Hétfő
+    end_of_week = start_of_week + timedelta(days=6)  # Vasárnap
 
-    # Ellenőrizzük, hogy helyes formátumban vannak-e a dátumok
-    start = parse_datetime(start)
-    end = parse_datetime(end)
+    start_of_week = make_aware(datetime.combine(start_of_week, datetime.min.time()))
+    end_of_week = make_aware(datetime.combine(end_of_week, datetime.max.time()))
 
-    # Ha nem sikerült a parszolás, akkor hibát jelezhetünk
-    if not start or not end:
-        return JsonResponse({'status': 'error', 'message': 'Hibás dátum formátum.'}, status=400)
-
-    events = Event.objects.filter(start_time__gte=start, end_time__lte=end)
+    if current_user.is_superuser or current_user.groups.filter(name="edzo").exists():
+        events = Event.objects.all()
+    else:
+        # Sima user csak a vasárnaptól vasárnapig terjedő eseményeket látja
+        events = Event.objects.filter(
+            start_time__gte=start_of_week,
+            start_time__lte=end_of_week
+        )
 
     event_list = []
     for event in events:
@@ -106,10 +129,8 @@ def events_api(request):
             'start': event.start_time.isoformat(),
             'end': event.end_time.isoformat(),
             'description': event.description,
-            'user_is_attending': is_attending  # Itt adjuk hozzá
+            'user_is_attending': is_attending
         })
-
-    print(event_list)  # Logoljuk az event_list-et a konzolra
 
     return JsonResponse(event_list, safe=False)
 
@@ -125,11 +146,11 @@ def signup_event(request):
     event = get_object_or_404(Event, id=event_id)
 
     if not event.is_signup_open():
-        return JsonResponse({'status': 'error', 'message': 'A jelentkezési határidő lejárt.'}, status=400)
+        return JsonResponse({'status': 'error', 'message': 'A jelentkezési határidő lejárt.'}, status=400,json_dumps_params={'ensure_ascii': False})
 
     attendance, created = Attendance.objects.get_or_create(user=request.user, event=event)
     if not created:
-        return JsonResponse({'status': 'error', 'message': 'Már jelentkezett erre az eseményre!'}, status=400)
+        return JsonResponse({'status': 'error', 'message': 'Már jelentkezett erre az eseményre!'}, status=400,json_dumps_params={'ensure_ascii': False})
 
     # Email küldése az edzőknek
     subject = f"Új jelentkezés: {event.title}"
@@ -155,7 +176,7 @@ def unsubscribe_event(request):
         event = attendance.event
 
         if not event.is_cancel_allowed():
-            return JsonResponse({'status': 'error', 'message': 'A lemondási határidő lejárt.'}, status=400)
+            return JsonResponse({'status': 'error', 'message': 'A lemondási határidő lejárt.'}, status=400,json_dumps_params={'ensure_ascii': False})
 
         attendance.delete()
 
@@ -171,7 +192,7 @@ def unsubscribe_event(request):
 
     except Attendance.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Nem található a jelentkezés erre az eseményre.'},
-                            status=404)
+                            status=404,json_dumps_params={'ensure_ascii': False})
 
 
 from django.shortcuts import render, get_object_or_404, redirect
