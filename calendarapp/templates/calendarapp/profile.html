@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block content %}
   <h1>Profilom</h1>
 
   <!-- Felhasználói adatok -->
   <div>
-    <h3>{{ name }}</h3>
+    <h3>{{ user|display_name }}</h3>
     {% if picture_url %}
       <img src="{{ picture_url }}" alt="Profile Picture" style="max-width: 150px; max-height: 150px;">
     {% else %}
