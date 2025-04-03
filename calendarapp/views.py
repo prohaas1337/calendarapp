@@ -502,3 +502,34 @@ def jelentkezesek_listaja(request):
     return render(request, "calendarapp/jelentkezesek_listaja.html", {
         "statisztika": statisztika
     })
+
+
+from django.shortcuts import render, redirect
+from .forms import UserProfileForm
+from .utils import get_facebook_name
+
+
+def update_user_profile_name(user):
+    facebook_name = get_facebook_name(user)
+    if facebook_name:
+        user.userprofile.display_name = facebook_name
+        user.userprofile.save()
+
+from django.shortcuts import render, redirect
+from .forms import UserProfileForm
+from .models import UserProfile
+
+
+def update_profile(request):
+    # Ellenőrizzük, hogy létezik-e a UserProfile
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=user_profile)
+        if form.is_valid():
+            form.save()
+            return redirect('calendarapp:profile')  # Itt állítsd be a megfelelő profiloldali URL-t
+    else:
+        form = UserProfileForm(instance=user_profile)
+
+    return render(request, 'calendarapp/update_profile.html', {'form': form})
