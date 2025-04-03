@@ -22,4 +22,5 @@ urlpatterns = [
     path('checkin/<int:event_id>/', views.event_checkin_view, name='checkin_event'),
     path('statisztika/', views.jelentkezesek_listaja, name='jelentkezesek_listaja'),
     path('delete_event/<int:event_id>/', views.single_delete, name='delete_event'),
+    path('update/', views.update_profile, name='update_profile'),
 ]
