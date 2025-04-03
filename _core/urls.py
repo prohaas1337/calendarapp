@@ -23,7 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('calendar/', include('calendarapp.urls')),
     path('accounts/', include('allauth.urls')),
-    path('accounts/profile/', views.profile, name='profile'),
     path('', views.index),
     path('calendar/', include('calendarapp.urls')),
 ]
