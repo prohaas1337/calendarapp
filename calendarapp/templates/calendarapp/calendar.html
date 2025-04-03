@@ -57,7 +57,7 @@
 
 <script>
     var user = {
-        username: "{{ user.username }}"
+        username: "{{ user.profile.full_name|default:user.username|escapejs }}"
     };
     // Helper függvény a CSRF token lekéréséhez
     function getCookie(name) {
