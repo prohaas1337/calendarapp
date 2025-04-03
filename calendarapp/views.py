@@ -30,6 +30,7 @@ from django.utils.timezone import make_aware
 def calendar_view(request):
     today = now().date()
     current_user = request.user
+    user_display_name = current_user.get_display_name()
     # Hét kezdete és vége
     start_of_week = today - timedelta(days=today.weekday())  # Hétfő (mostantól korrekt)
     end_of_week = start_of_week + timedelta(days=6)  # Vasárnap
@@ -72,6 +73,7 @@ def calendar_view(request):
         'start_of_week': start_of_week,
         'end_of_week': end_of_week,
         'events': events_list,
+        'user_display_name': user_display_name,
     }
     #for event in events:
     #    print(f"Esemény: {event.title}, Kezdés: {event.start_time}, Befejezés: {event.end_time}")
@@ -83,7 +85,12 @@ def event_detail(request, event_id):
     try:
         event = Event.objects.get(id=event_id)
         attendees = Attendance.objects.filter(event=event)
-        attendee_names = [attendee.user.username for attendee in attendees]
+        attendee_names = [
+            attendee.user.get_display_name() if hasattr(attendee.user,
+                                                        "get_display_name") and attendee.user.get_display_name()
+            else attendee.user.username
+            for attendee in attendees
+        ]
 
         event_data = {
             'id': event.id,
@@ -123,6 +130,14 @@ def events_api(request):
     event_list = []
     for event in events:
         is_attending = Attendance.objects.filter(user=request.user, event=event).exists()
+        # Jelentkezettek nevei a display_name vagy username alapján
+        attendees = Attendance.objects.filter(event=event)
+        attendee_names = [
+            attendee.user.get_display_name() if hasattr(attendee.user,
+                                                        "get_display_name") and attendee.user.get_display_name()
+            else attendee.user.username
+            for attendee in attendees
+        ]
         event_list.append({
             'id': event.id,
             'title': event.title,

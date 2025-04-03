@@ -9,7 +9,7 @@
 
 {% block content %}
 <h1 class="mb-4">Naptár</h1>
-
+<span>Üdv, {{ user_display_name }}!</span>
 <div id="calendar"></div>
 
 <!-- Modal -->
@@ -57,8 +57,8 @@
 
 <script>
     var user = {
-        username: "{{ user.username }}"
-    };
+    username: "{{ user_display_name }}"
+};
     // Helper függvény a CSRF token lekéréséhez
     function getCookie(name) {
         var cookieValue = null;

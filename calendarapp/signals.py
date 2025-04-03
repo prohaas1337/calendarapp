@@ -12,3 +12,12 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.userprofile.save()
+
+from django.contrib.auth.models import User
+
+def get_display_name(self):
+    if hasattr(self, 'userprofile') and self.userprofile.display_name:
+        return self.userprofile.display_name
+    return self.username
+
+User.add_to_class("get_display_name", get_display_name)
