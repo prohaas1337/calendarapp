@@ -504,20 +504,25 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_http_methods
 from django.db.models import Count, Q
 from .models import Attendance
+from django.contrib.auth.models import User
+from django.db.models import Count, Q
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.http import require_http_methods
+from .models import Attendance
 
 @user_passes_test(is_admin_or_group_leader)
 @login_required
 @require_http_methods(["GET"])
 def jelentkezesek_listaja(request):
-    statisztika = Attendance.objects.values('user__username').annotate(
-        jelentkezesek_szama=Count('id'),
-        checkinek_szama=Count('id', filter=Q(checked_in=True))
+    statisztika = User.objects.annotate(
+        jelentkezesek_szama=Count('attendance'),
+        checkinek_szama=Count('attendance', filter=Q(attendance__checked_in=True))
     ).order_by('-jelentkezesek_szama')
 
     return render(request, "calendarapp/jelentkezesek_listaja.html", {
         "statisztika": statisztika
     })
-
 
 from django.shortcuts import render, redirect
 from .forms import UserProfileForm

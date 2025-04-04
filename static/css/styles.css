@@ -27,7 +27,7 @@
     font-size: 1rem;
   }
 }
-
+/* user summary */
 .attendance-table {
   width: 100%;
   border-collapse: collapse;
@@ -37,11 +37,6 @@
 .attendance-table th, .attendance-table td {
   padding: 10px;
   text-align: left;
-}
-
-.attendance-table .user-column {
-  width: 70%; /* Felhasználó oszlop szélessége */
-  background-color: #f9f9f9; /* Világos háttérszín */
 }
 
 .attendance-table .checkin-column {
@@ -59,6 +54,7 @@
   color: black;
 }
 
+/* jelentkezesek listaja  - statisztika */
 .statistics-table {
   width: 100%;
   border-collapse: collapse;
@@ -80,10 +76,6 @@
 .statistics-table td {
   border: 1px solid #ddd;
   background-color: #f9f9f9;
-}
-
-.statistics-table tr:nth-child(even) td {
-  background-color: #f1f1f1; /* Szürke háttér a páros soroknak */
 }
 
 .statistics-table tr:hover td {
@@ -134,7 +126,7 @@ h1 {
 .filters-form button:hover {
     background-color: #45a049;
 }
-
+/* event-summary htmlhez */
 .events-table {
     width: 100%;
     border-collapse: collapse;
@@ -228,4 +220,43 @@ button.show-more {
 
 button.show-more:hover {
     background-color: #0056b3;
+}
+.common-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-family: Arial, sans-serif;
+}
+
+.common-table th, .common-table td {
+  padding: 12px 15px;
+  text-align: center;
+}
+
+.common-table th {
+  background-color: #4CAF50; /* Zöld háttér a fejlécnek */
+  color: white;
+  font-weight: bold;
+}
+
+.common-table td {
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+/* Páros sorok eltérő színnel */
+.common-table tr:nth-child(even) td {
+  background-color: #f9f9f9;
+}
+
+.common-table tr:nth-child(odd) td {
+  background-color: #e7e7ee;
+}
+
+.common-table tr:hover td {
+  background-color: #ddd; /* Hover színváltoztatás */
+}
+
+.common-table tr.highlight-row td {
+    background-color: #ffcccc !important;
 }
