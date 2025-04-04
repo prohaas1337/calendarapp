@@ -1,20 +1,20 @@
 {% extends 'base.html' %}
-
+{% load custom_filters %}
 
 {% block content %}
     <h1>Felhasználók jelentkezései és jelenléte</h1>
-    <table class="statistics-table">
+    <table class="common-table">
         <thead>
             <tr>
                 <th>Felhasználó</th>
-                <th>Jelentkezések száma</th>
-                <th>Check-in-ek száma</th>
+                <th>Jelentkezett</th>
+                <th>Megjelent</th>
             </tr>
         </thead>
         <tbody>
             {% for adat in statisztika %}
-                <tr>
-                    <td>{{ adat.user__username }}</td>
+                <tr {% if adat.jelentkezesek_szama != adat.checkinek_szama %}class="highlight-row"{% endif %}>
+                    <td>{{ adat|display_name }}</td>
                     <td>{{ adat.jelentkezesek_szama }}</td>
                     <td>{{ adat.checkinek_szama }}</td>
                 </tr>
